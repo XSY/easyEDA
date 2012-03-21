@@ -1,8 +1,0 @@
-eda.pivot.incoming.host: "localhost"
-eda.pivot.incoming.port: 5559
-eda.pivot.outgoing.host: "localhost"
-eda.pivot.outgoing.port: 5560
-eda.router.incoming.host: "localhost"
-eda.router.incoming.port: 5588
-eda.router.outgoing.host: "localhost"
-eda.router.outgoing.port: 5589
