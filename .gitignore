@@ -1,9 +1,0 @@
-#.gitignore of easyEDA project
-*/.classpath
-*/.project
-*/.eclipse/
-*/.eclipse/*.*
-*/target/
-*/target/*.*
-*/.DS_Store
-
