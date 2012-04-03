@@ -3,7 +3,6 @@
 */.project
 */.eclipse/
 */.eclipse/*.*
-*/target/
 */target/*.*
 */.DS_Store
 core/*/.settings
@@ -11,3 +10,4 @@ core/*/.classpath
 core/*/.DS_Store
 core/*/.project
 easyeda.sample/.settings
+.DS_Store

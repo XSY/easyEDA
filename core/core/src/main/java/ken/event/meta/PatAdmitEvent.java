@@ -1,9 +1,4 @@
-/**
- * 
- */
 package ken.event.meta;
-
-import java.util.Date;
 
 /**
  * @author KennyZJ

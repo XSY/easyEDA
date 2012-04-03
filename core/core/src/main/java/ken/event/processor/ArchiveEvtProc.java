@@ -3,6 +3,8 @@ package ken.event.processor;
 import java.util.Map;
 
 import ken.event.Event;
+import ken.event.store.EStore;
+import ken.event.store.IEStore;
 
 import org.apache.log4j.Logger;
 
@@ -20,6 +22,11 @@ import backtype.storm.tuple.Tuple;
 public class ArchiveEvtProc extends BaseEvtProc {
 
 	public static Logger log = Logger.getLogger(ArchiveEvtProc.class);
+	private IEStore store;
+
+	// private enum StoreType{
+	// HBase,MySQL
+	// }
 
 	@Override
 	@SuppressWarnings("rawtypes")
@@ -27,31 +34,23 @@ public class ArchiveEvtProc extends BaseEvtProc {
 			OutputCollector collector) {
 		super.prepare(stormConf, context, collector);
 		// TODO initialize persistence environment, eg. DB, file system
-
+		store = EStore.getStore(EStore.HBASE);
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		// TODO Auto-generated method stub
 		log.info("going to store the event...");
-
 		@SuppressWarnings("rawtypes")
 		Event evt = (Event) input.get("eventdata");
-
-		log.info("This event is a [" + evt.getEvtType() + "]");
-
-		
-		try{
-			// TODO do persist event
-			//_collector.emit(input, new Values("Archived!"));
-			
+		log.debug("This event is a [" + evt.getEvtType() + "]");
+		try {
+			// do persist event
+			log.debug("tuple.msgid = " + input.getMessageId());
+			store.storeEvent(evt);
 			_collector.ack(input);
-			
-		}catch(Exception e){
+		} catch (Exception e) {
 			_collector.fail(input);
 		}
-		
-		
 	}
 
 	@Override
@@ -63,8 +62,7 @@ public class ArchiveEvtProc extends BaseEvtProc {
 	public void cleanup() {
 		super.cleanup();
 		// TODO clean the persistence environment, eg. release DB connection
-		
+
 	}
-	
 
 }

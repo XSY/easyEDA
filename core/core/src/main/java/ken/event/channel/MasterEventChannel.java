@@ -61,12 +61,11 @@ public class MasterEventChannel extends BaseEventChannel {
 		i++;
 		try {
 			evt = (Event<AtomicE>) JDKSerializeUtil.getObject(request);
-
 			LOG.debug("No.[" + i + "] event received...with type["
-					+ evt.getEvtType()+"]");
-
-			_collector.emit(new Values(evt));
-
+					+ evt.getEvtType() + "]");
+			String msgId = (String) evt.getEventID();
+			LOG.debug("msgid:" + msgId);
+			_collector.emit(new Values(evt), msgId);
 		} catch (IOException ioe) {
 			LOG.error("easyEDA cannot deserialize input event for reason: "
 					+ ioe.getCause());
@@ -103,6 +102,7 @@ public class MasterEventChannel extends BaseEventChannel {
 	@Override
 	public void ack(Object msgId) {
 		// TODO HA work
+		LOG.debug(msgId + " acked!");
 	}
 
 	@Override

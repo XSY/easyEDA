@@ -44,7 +44,16 @@ public class AddressingEvtProc extends BaseEvtProc {
 		if (evt != null) {
 			String evtType = evt.getEvtType();
 			List<Follower> followers = eventMap.get(evtType);
-			_collector.emit(input, new Values(evt, followers));
+			//_collector.emit(input, new Values(evt, followers));
+			_collector.emit(new Values(evt, followers)); // untouched the anchor
+															// tuple, if
+															// addressing
+															// complete and
+															// tuple has been
+															// sent to
+															// routerevtProc,
+															// then let it be
+															// sent to router
 			log.info("in AddressingEvtProc emitted: " + evt.getEvtType());
 			_collector.ack(input);
 		} else {
