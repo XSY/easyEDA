@@ -9,5 +9,7 @@ core/*/.settings
 core/*/.classpath
 core/*/.DS_Store
 core/*/.project
+core/*/target
+core/*/target/*
 easyeda.sample/.settings
 .DS_Store
