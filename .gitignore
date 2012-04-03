@@ -1,15 +1,12 @@
 #.gitignore of easyEDA project
-*/.classpath
-*/.project
-*/.eclipse/
-*/.eclipse/*.*
-*/target/*.*
-*/.DS_Store
-core/*/.settings
-core/*/.classpath
-core/*/.DS_Store
-core/*/.project
-core/*/target
-core/*/target/*
-easyeda.sample/.settings
+.classpath
+.project
+.eclipse/
 .DS_Store
+.settings
+/target
+/classes
+/test-classes
+*.jar
+*.zip
+
