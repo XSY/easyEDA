@@ -35,7 +35,6 @@ public class Adapter extends Thread implements IAdapter {
 
 	public Adapter(Map<String, Object> conf) {
 		super();
-
 	}
 
 	public void startAdapter() {
