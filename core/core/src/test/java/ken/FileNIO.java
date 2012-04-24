@@ -7,33 +7,42 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 public class FileNIO {
 
-	public static void main(String... args) {
+	public static void main(String... args) throws InterruptedException {
 
-		String filefullname = "/Users/KennyZJ/Develop/source/Java/easyEDA/core/core/testNIO.txt";
+		String filefullname = "/Users/KennyZJ/test/test.txt";
 		try {
 			// FileInputStream fis = new FileInputStream(filefullname);
 			File file = new File(filefullname);
+			File dir = file.getParentFile();
+
+			dir.mkdirs();
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-			FileOutputStream fos = new FileOutputStream(file);
+			FileOutputStream fout = new FileOutputStream(file);
 
 			//
-			FileChannel fc = fos.getChannel();
-			ByteBuffer buffer = ByteBuffer.allocate(1024000);
+			FileChannel fc = fout.getChannel();
+			FileLock lock = fc.tryLock();
 
-			for (int i = 0; i < 100; i++) {
+			ByteBuffer buffer = ByteBuffer.allocate(1024);
+			
+			for (int i = 0; i < 10; i++) {
 				buffer.put("test java.nio.ByteBuffer\n".getBytes());
 			}
 			buffer.flip();
 
 			fc.write(buffer);
 			buffer.clear();
-			
-			fc.read(buffer);
+			lock.release();
+			fc.close();
+			fout.close();
+
+			// fc.read(buffer);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

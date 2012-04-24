@@ -1,12 +1,23 @@
 package ken;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import ken.event.EConfig;
+import ken.event.Event;
+import ken.event.meta.PatAdmitEvent;
+import ken.event.util.EventBuilder;
+import ken.event.util.JDKSerializeUtil;
+
+import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
 public class ClientSend extends Thread {
-
+	public static Logger LOG = Logger.getLogger(ClientSend.class);
+	
 	ZMQ.Context context;
 	ZMQ.Socket socket;
-	final static String router_host = "tcp://localhost:5588";
+	final static String router_host = "tcp://localhost:"+EConfig.loadAll().get(EConfig.EDA_ROUTER_INCOMING_PORT);
 	final static int MAX_RETRY = 3;
 	final static int ITVL_RETRY = 200; // millisecond
 	String _dest;
@@ -24,7 +35,10 @@ public class ClientSend extends Thread {
 	}
 
 	public void run() {
+		LOG.debug("to connect");
 		socket.connect(router_host);
+		LOG.debug("connect ok");
+		
 		//TODO upgrade the reliability
 		
 //		while (!Thread.currentThread().isInterrupted()) {
@@ -71,20 +85,38 @@ public class ClientSend extends Thread {
 //			}
 //		}
 		while (!Thread.currentThread().isInterrupted()) {
+			LOG.debug("to send");
 			socket.send(_dest.getBytes(), ZMQ.SNDMORE);
 			socket.send("".getBytes(), ZMQ.SNDMORE);
-			socket.send("Hello".getBytes(), 0);
 			
+			PatAdmitEvent pae = new PatAdmitEvent();
+			pae.setpName("张三");
+			pae.setAdmitTS(System.currentTimeMillis()-1000);
+			pae.setpCard("医保卡0000001");
+			try {
+				@SuppressWarnings("unchecked")
+				Event<PatAdmitEvent> e = EventBuilder.buildEvent(pae);
+				socket.send(JDKSerializeUtil.getBytes(e), 0);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			//socket.send("测试中文".getBytes(), 0);
+			LOG.debug("send ok");
+			LOG.debug("to recv");
 			String reply;
 
 			reply = new String(socket.recv(0));
+			LOG.debug("recv ok");
 			if (reply != null) {
-				System.out.println("[Client-" + _id
+				LOG.debug("[Client-" + _id
 						+ "] received reply:[" + reply + "]");
 			}
 
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(4000);
 			} catch (InterruptedException ie) {
 				ie.printStackTrace();
 			}

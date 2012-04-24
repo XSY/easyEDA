@@ -2,7 +2,6 @@ package ken.event.channel;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import ken.event.EConfig;
 import ken.event.Event;
@@ -35,6 +34,7 @@ public class MasterEventChannel extends BaseEventChannel {
 	private ZMQ.Socket _socket;
 	private ZMQ.Context _ctx;
 
+	@SuppressWarnings("rawtypes")
 	Event evt;
 
 	// private LinkedBlockingQueue<Event> queue;
@@ -49,13 +49,14 @@ public class MasterEventChannel extends BaseEventChannel {
 		super(isDistributed);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void nextTuple() {
 
 		LOG.debug("start recv...");
 
 		byte[] request = _socket.recv(0);
-		_socket.send(("event received by [Thread-"
+		_socket.send(("received by [Thread-"
 				+ Thread.currentThread().getId() + "]").getBytes(), 0);
 
 		i++;

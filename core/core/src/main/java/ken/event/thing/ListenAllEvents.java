@@ -48,7 +48,7 @@ public class ListenAllEvents {
 
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout(a_n, new MasterEventChannel(), a_p);
-		builder.setBolt(a1_n, new ArchiveEvtProc(), a1_p).shuffleGrouping(a_n);
+		//builder.setBolt(a1_n, new ArchiveEvtProc(), a1_p).shuffleGrouping(a_n);
 		builder.setBolt(a2_n, new AddressingEvtProc(), a2_p).shuffleGrouping(a_n);
 		builder.setBolt(a21_n, new RouteEvtProc(), a21_p).shuffleGrouping(a2_n);
 

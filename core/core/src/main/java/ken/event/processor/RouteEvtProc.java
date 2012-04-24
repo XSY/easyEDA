@@ -1,13 +1,11 @@
 package ken.event.processor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ken.event.EConfig;
 import ken.event.Event;
-import ken.event.Follower;
 import ken.event.util.JDKSerializeUtil;
 
 import org.apache.log4j.Logger;
@@ -26,12 +24,13 @@ public class RouteEvtProc extends BaseEvtProc {
 
 	public static Logger log = Logger.getLogger(RouteEvtProc.class);
 
-	ZMQ.Context zmq_ctx;
-	ZMQ.Socket sender;
-	private static String pub_dest;
+	private ZMQ.Context zmq_ctx;
+	private ZMQ.Socket sender;
+	private String pub_dest;
 
+	@SuppressWarnings("rawtypes")
 	private Event evt;
-	private List<Follower> followers = new ArrayList<Follower>();
+	private Set<String> followers;
 	private String _sender_id;
 
 	@SuppressWarnings("rawtypes")
@@ -45,16 +44,16 @@ public class RouteEvtProc extends BaseEvtProc {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void execute(Tuple input) {
 		log.debug("routerevtProc start execute...");
 		try {
-			followers.addAll((List<Follower>) input.get("followers"));
+			followers = (Set<String>) input.get("followers");
 			log.debug("followers.size() = " + followers.size());
 			evt = (Event) input.get("eventdata");
 			if (sender != null && followers != null && followers.size() > 0) {
-				for (Follower fo : followers) {
-					sendToRouter(evt, fo.getId());
+				for (String follower : followers) {
+					sendToRouter(evt, follower);
 				}
 			}
 			followers.clear();
@@ -77,7 +76,7 @@ public class RouteEvtProc extends BaseEvtProc {
 			this.zmq_ctx = null;
 		}
 		try {
-			Thread.sleep(1000); // need time to release
+			Thread.sleep(100); // need time to release
 		} catch (InterruptedException e) {
 			log.error(e.getMessage());
 		}
@@ -87,8 +86,7 @@ public class RouteEvtProc extends BaseEvtProc {
 	private void initZMQ(Map stormConf, TopologyContext context) {
 		zmq_ctx = ZMQ.context(1);
 		sender = zmq_ctx.socket(ZMQ.REQ);
-		// generate sender identity with format
-		// [storm_ID]-[component_ID]-[task_ID]
+		// generate sender identity with format {storm_ID}-{component_ID}-{task_ID}
 		_sender_id = String.format("%s-%s-%d", context.getStormId(),
 				context.getThisComponentId(), context.getThisTaskId());
 		sender.setIdentity(_sender_id.getBytes());

@@ -11,6 +11,7 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 
 /**
+ * Simple router which only support plain follower in non-HA way
  * @author KennyZJ
  * 
  */
@@ -101,14 +102,11 @@ public class EventRouter {
 				log.debug("part 5: request.length = [" + request.length + "]");
 
 				// forward to backend
-				backend.send(to.getBytes(), ZMQ.SNDMORE); // 1 set worker
-															// address
+				backend.send(to.getBytes(), ZMQ.SNDMORE); // 1 set worker address
 				backend.send("".getBytes(), ZMQ.SNDMORE);
-				backend.send(from.getBytes(), ZMQ.SNDMORE); // 2 set client
-															// address
+				backend.send(from.getBytes(), ZMQ.SNDMORE); // 2 set client address
 				backend.send("".getBytes(), ZMQ.SNDMORE);
-				backend.send(request, 0); // 3 set request
-											// payload
+				backend.send(request, 0); // 3 set request payload
 			}
 		}
 

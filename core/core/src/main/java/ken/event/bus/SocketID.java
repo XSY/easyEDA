@@ -1,10 +1,18 @@
+/**
+ * 
+ */
 package ken.event.bus;
 
 /**
  * @author KennyZJ
  * 
  */
-public class SocketID implements java.io.Serializable{
+public class SocketID implements java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7380377888823510543L;
+
 	private String follower_key;
 	private String threadID;
 
@@ -31,14 +39,23 @@ public class SocketID implements java.io.Serializable{
 
 	@Override
 	public boolean equals(Object obj) {
-		SocketID another = (SocketID) obj;
-		String k = another.getFollower_key();
-		String t = another.getThreadID();
-		if (k == null || "".equals(t) || t == null | "".equals(t)) {
-			return false;
-		} else {
-			return k.equals(follower_key) && t.equals(threadID);
+		if (obj instanceof SocketID) {
+			SocketID another = (SocketID) obj;
+			String k = another.getFollower_key();
+			String t = another.getThreadID();
+			if (k == null || "".equals(t) || t == null | "".equals(t)) {
+				return false;
+			} else {
+				return k.equals(follower_key) && t.equals(threadID);
+			}
 		}
+		return false;
+
+	}
+	
+	@Override
+	public int hashCode(){
+		return ("follower_key:"+follower_key+"|threadID:"+threadID).hashCode();
 	}
 
 }

@@ -8,7 +8,7 @@ public class EStore {
 
 	public static final int HBASE = 0;
 	public static final int MYSQL = 1;
-
+	
 	public static IEStore getStore(int storeType) {
 		IEStore store;
 		switch (storeType) {

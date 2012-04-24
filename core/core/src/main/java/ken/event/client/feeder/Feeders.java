@@ -1,12 +1,6 @@
-/**
- * 
- */
 package ken.event.client.feeder;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import ken.event.client.follower.IFollower;
 
 /**
  * @author KennyZJ
@@ -14,24 +8,24 @@ import ken.event.client.follower.IFollower;
  */
 public class Feeders {
 
-	private static Map<String, IFeeder> pool = new ConcurrentHashMap<String, IFeeder>();
+	private static ConcurrentHashMap<String, IFeeder> pool = new ConcurrentHashMap<String, IFeeder>();
 
 	private Feeders() {
 
 	}
 
-	public static IFeeder get(String name){
+	public static IFeeder get(String name) {
 		IFeeder fe = pool.get(name);
-		if(fe==null){
+		if (fe == null) {
 			fe = new BasicFeeder(name);
-			pool.put(name, fe);
+			pool.putIfAbsent(name, fe);
 		}
 		return fe;
 	}
-	
+
 	/**
-	 * this method is to remove the feeder by key, usually when the
-	 * feeder is updated from someone else, or should be shutdown
+	 * this method is to remove the feeder by key, usually when the feeder is
+	 * updated from someone else, or should be shutdown
 	 * 
 	 * @param key
 	 */

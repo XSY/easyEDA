@@ -27,16 +27,16 @@ public class HBaseStore implements IEStore {
 		return new HBaseStore();
 	}
 
-	protected HBaseStore() {
+	private HBaseStore() {
 		super();
 		init();
 	}
 
 	private void init() {
 		try {
-			hbase = new HBaseClient(true);
-		} catch (Exception e1) {
-			LOG.error(e1.getStackTrace());
+			hbase = new HBaseClient(EVENT_TABLE_NAME, cfs, true);
+		} catch (Exception e) {
+			LOG.error(e.getStackTrace());
 		}
 	}
 
@@ -45,10 +45,10 @@ public class HBaseStore implements IEStore {
 	public void storeEvent(Event evt) {
 		Map<String, byte[]> data = new HashMap<String, byte[]>();
 		try {
+			// TODO qualifier name
 			data.put(cfs[0] + ":1", evt.getEvtType().getBytes());// just for demo
 			data.put(cfs[1] + ":1", JDKSerializeUtil.getBytes(evt.getEvtData()));
-			hbase.putData(EVENT_TABLE_NAME,
-					((String) evt.getEventID()).getBytes(), data);
+			hbase.putData(((String) evt.getEventID()).getBytes(), data);
 		} catch (IOException e) {
 			LOG.error(e.getStackTrace());
 		}

@@ -9,4 +9,5 @@
 /test-classes
 *.jar
 *.zip
-
+core/target
+easyeda.sample/target

@@ -16,6 +16,7 @@ import ken.event.util.EventBuilder;
 import ken.event.util.JDKSerializeUtil;
 
 import ken.event.client.EventBox;
+import ken.event.client.QueuedEventBox;
 import ken.event.client.adapter.IAdapter;
 
 /**
@@ -44,18 +45,17 @@ public class BasicFeeder extends Thread implements IFeeder {
 		_dest = "tcp://" + conf.get(EConfig.EDA_PIVOT_INCOMING_HOST) + ":"
 				+ conf.get(EConfig.EDA_PIVOT_INCOMING_PORT);
 
-		box = new EventBox();// default set capacity to Integer.MAX_VALUE
+		box = new QueuedEventBox();// default set capacity to Integer.MAX_VALUE
 		adapters = new ArrayList<IAdapter>();
 		context = ZMQ.context(1);
 		socket = context.socket(ZMQ.REQ);
-
 	}
 
 	@Override
 	public void startFeeding() throws Exception {
 
 		if (this.isAlive()) {
-			LOG.warn("This thread is still working!");
+			LOG.warn("This thread is already started!");
 		} else {
 			if (adapters == null || adapters.size() < 1) {
 				throw new Exception("no adapter attached to me!");
@@ -67,11 +67,6 @@ public class BasicFeeder extends Thread implements IFeeder {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ken.event.client.feeder.IFeeder#stopFeeding()
-	 */
 	@Override
 	public void stopFeeding() {
 		socket.close();
@@ -105,7 +100,7 @@ public class BasicFeeder extends Thread implements IFeeder {
 	}
 
 	/**
-	 * allow duplicate adapter to be added
+	 * allow duplicate adapters to be added
 	 */
 	public void setAdapter(IAdapter a) {
 		adapters.add(a);
@@ -124,6 +119,7 @@ public class BasicFeeder extends Thread implements IFeeder {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void feed() throws InterruptedException, IOException {
 		Event evt;
 		AtomicE ae;

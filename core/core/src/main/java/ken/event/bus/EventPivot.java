@@ -78,7 +78,7 @@ public class EventPivot {
 				}
 			}
 		}
-		// We never get here but clean up anyhow
+		// We never get here but clean up anyhow, only if this thread is interrupted
 		frontend.close();
 		backend.close();
 		context.term();

@@ -20,6 +20,7 @@ public class MultiThread extends Thread {
 		while (true) {
 			
 			try {
+				Thread.sleep(3000);
 				next = _queue.take();
 				if (next == null) {
 					System.out.println("childThread-[" + _myname

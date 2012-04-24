@@ -7,58 +7,60 @@ import java.util.Map;
 
 import ken.event.EConfig;
 import ken.event.Event;
+import ken.event.bus.SocketID;
 import ken.event.client.EventBox;
+import ken.event.client.QueuedEventBox;
 import ken.event.client.adapter.IAdapter;
 import ken.event.meta.AtomicE;
 import ken.event.util.JDKSerializeUtil;
+import ken.event.util.ZMQUtil;
 
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Poller;
 
-/**
- * BasicFollower is to follow one or more kinds of event with only one receive
- * thread running each different event type, but the received event data still
- * can be consumed by multiple adapters
- * 
- * @author KennyZJ
- * 
- */
 public class BasicFollower extends Thread implements IFollower {
-
 	public static Logger LOG = Logger.getLogger(BasicFollower.class);
+	private static Map<String, Object> conf = EConfig.loadAll();
 
 	private String _key;
 	private String _dest;
 	private EventBox box;
-	private List<String> following; // event types which this follower is
-									// supposed to follow
 	private List<IAdapter> adapters;
 
 	private ZMQ.Context context;
 	private ZMQ.Socket socket;
+	private SocketID sid;
 
-	protected BasicFollower(String key) {
+	private String ask;
+	private String report;
+
+	
+
+	protected BasicFollower(String key) throws IOException {
 		super();
 		// initialize, get the following by follower key automatically
 		init(key);
 	}
 
-	private void init(String key) {
+	private void init(String key) throws IOException {
 		this._key = key;
-		Map<String, Object> conf = EConfig.loadAll();
 		_dest = "tcp://" + conf.get(EConfig.EDA_ROUTER_OUTGOING_HOST) + ":"
 				+ conf.get(EConfig.EDA_ROUTER_OUTGOING_PORT);
-		box = new EventBox();// default set capacity to Integer.MAX_VALUE
+
+		ask = (String) conf.get(EConfig.EDA_ROUTER_HAND_ASK);
+		report = (String) conf.get(EConfig.EDA_ROUTER_HAND_REPORT);
+		box = new QueuedEventBox();// default set capacity to Integer.MAX_VALUE
 		adapters = new ArrayList<IAdapter>();
-		// following = ConfigUtil.lookupFollowerMapping(_key);
 		context = ZMQ.context(1);
 		socket = context.socket(ZMQ.REQ);
-		socket.setIdentity(_key.getBytes());
+		sid = new SocketID(_key, "1");
+		socket.setIdentity(JDKSerializeUtil.getBytes(sid));
 	}
 
 	public void startFollowing() throws Exception {
 		if (this.isAlive()) {
-			LOG.warn("This thread is already working!");
+			LOG.warn("This thread is already started!");
 		} else {
 			// check whether there is at least one adapter attached to the
 			// follower
@@ -67,7 +69,7 @@ public class BasicFollower extends Thread implements IFollower {
 			}
 			prepareAdapters();
 			socket.connect(_dest);
-			socket.send("READY".getBytes(), 0);
+			// socket.send("READY".getBytes(), 0);
 			Thread.sleep(100);
 			super.start();
 		}
@@ -105,7 +107,7 @@ public class BasicFollower extends Thread implements IFollower {
 	}
 
 	/**
-	 * allow duplicate adapter to be added
+	 * allow duplicate adapters to be added
 	 */
 	public void setAdapter(IAdapter a) {
 		adapters.add(a);
@@ -126,23 +128,99 @@ public class BasicFollower extends Thread implements IFollower {
 
 	private void follow() throws IOException, ClassNotFoundException,
 			InterruptedException {
-		byte[] payload;
+		// byte[] payload;
+		// while (!Thread.currentThread().isInterrupted()) {
+		// String client_addr = new String(socket.recv(0));
+		// LOG.debug("client_addr:" + client_addr);
+		// String empty = new String(socket.recv(0));
+		// assert empty.length() == 0 | true;
+		//
+		// payload = socket.recv(0);
+		// LOG.debug("payload.length = " + payload.length);
+		// Event<AtomicE> e = (Event<AtomicE>) JDKSerializeUtil
+		// .getObject(payload);
+		// box.put(e.getEvtData());// payload, the real target
+		//
+		// socket.send(client_addr.getBytes(), ZMQ.SNDMORE);
+		// socket.send(empty.getBytes(), ZMQ.SNDMORE);
+		// socket.send((_key).getBytes(), 0);// _key as reply
+		// }
+
+		ZMQUtil.report(socket, report);
+		Poller poller = context.poller(1);
+		int count = 0;
+
 		while (!Thread.currentThread().isInterrupted()) {
-			String client_addr = new String(socket.recv(0));
-			LOG.debug("client_addr:" + client_addr);
-			String empty = new String(socket.recv(0));
-			assert empty.length() == 0 | true;
 
-			payload = socket.recv(0);
-			LOG.debug("payload.length = " + payload.length);
-			Event<AtomicE> e = (Event<AtomicE>) JDKSerializeUtil
-					.getObject(payload);
-			box.put(e.getEvtData());// payload, the real target
+			poller.register(socket, Poller.POLLIN);
+			poller.poll(3000 * 1000);
+			if (poller.pollin(0)) {
+				// received
+				LOG.debug(Thread.currentThread().getName() + "[Worker]-[fkey:"
+						+ _key + "|tid=" + 1 + "] is waiting to recv...");
+				String client_addr = new String(socket.recv(0));
+				if (ask.equals(client_addr)) {
+					LOG.debug(Thread.currentThread().getName()
+							+ "[Worker]-[fkey:" + _key + "|tid=" + 1
+							+ "] I am asked! Going to report I am alive...");
+					ZMQUtil.report(socket, report);
+				} else if (socket.hasReceiveMore()) {
+					String msgId = client_addr; // part1 is auto-matched with my
+												// socketID, part2 is msg_id
 
-			socket.send(client_addr.getBytes(), ZMQ.SNDMORE);
-			socket.send(empty.getBytes(), ZMQ.SNDMORE);
-			socket.send((_key).getBytes(), 0);//_key as reply
+					String empty = new String(socket.recv(0));
+					assert empty.length() == 0 | true;
+
+					// String request = new String(socket.recv(0));// payload,
+					// the
+					// real
+					// target
+
+					try {
+						Event<AtomicE> e = (Event) JDKSerializeUtil
+								.getObject(socket.recv(0));
+
+						box.put(e.getEvtData());
+						LOG.debug(Thread.currentThread().getName()
+								+ "[Worker]-[fkey:" + _key + "|tid=" + 1
+								+ "] recv ok");
+
+						socket.send(msgId.getBytes(), 0);// send msgId for
+															// representing
+															// recv ok!
+						LOG.debug(Thread.currentThread().getName()
+								+ "[Worker]-[fkey:" + _key + "|tid=" + 1
+								+ "] since follower started, received [" + count++
+								+ "] events!");
+					} catch (IOException e) {
+						LOG.error(e);
+					} catch (ClassNotFoundException e) {
+						LOG.error(e);
+					}
+				}
+				poller.unregister(socket);
+			} else {
+				// no response from router
+				LOG.debug(Thread.currentThread().getName() + "[Worker]-[fkey:"
+						+ _key + "|tid=" + 1
+						+ "] no response from router server.");
+				LOG.debug(Thread.currentThread().getName() + "[Worker]-[fkey:"
+						+ _key + "|tid=" + 1 + "] reconnecting...");
+				socket.setLinger(0);
+				socket.close();
+				poller.unregister(socket);
+				socket = context.socket(ZMQ.REQ);
+				try {
+					socket.setIdentity(JDKSerializeUtil.getBytes(sid));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				socket.connect(_dest);
+				ZMQUtil.report(socket, report);
+			}
 		}
+		// we never get here if everything is ok.
+		socket.close();
+		context.term();
 	}
-
 }

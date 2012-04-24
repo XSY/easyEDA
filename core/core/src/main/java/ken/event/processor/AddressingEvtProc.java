@@ -1,13 +1,10 @@
 package ken.event.processor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 import ken.event.Event;
-import ken.event.Follower;
-import ken.event.meta.EventConstants;
+import ken.event.management.ELocator;
 
 import org.apache.log4j.Logger;
 
@@ -27,14 +24,16 @@ public class AddressingEvtProc extends BaseEvtProc {
 
 	public static Logger log = Logger.getLogger(AddressingEvtProc.class);
 
-	private ConcurrentHashMap<String, List<Follower>> eventMap;
+	//private ConcurrentHashMap<String, List<Follower>> eventMap;
+
+	private ELocator locator;
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context,
 			OutputCollector collector) {
 		super.prepare(stormConf, context, collector);
-		loadEventMap();
+		locator = ELocator.getLocator(ELocator.Redis);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -43,21 +42,22 @@ public class AddressingEvtProc extends BaseEvtProc {
 		Event evt = (Event) input.get("eventdata");
 		if (evt != null) {
 			String evtType = evt.getEvtType();
-			List<Follower> followers = eventMap.get(evtType);
-			//_collector.emit(input, new Values(evt, followers));
-			_collector.emit(new Values(evt, followers)); // untouched the anchor
-															// tuple, if
-															// addressing
-															// complete and
-															// tuple has been
-															// sent to
-															// routerevtProc,
-															// then let it be
-															// sent to router
-			log.info("in AddressingEvtProc emitted: " + evt.getEvtType());
+			Set<String> followers = locator.lookup(evtType);
+			// _collector.emit(input, new Values(evt, followers));
+
+			// untouched the anchor tuple, if addressing complete and tuple
+			// has been sent to routerevtProc, then let it be sent to router
+			if (followers != null && followers.size() > 0) {
+				_collector.emit(new Values(evt, followers));
+				log.debug("AddressingEvtProc is emitting [" + evtType
+						+ "] event to [" + followers.size() + "] followers");
+			} else {
+				log.warn("event type [" + evtType + "] has no follower.");
+			}
+			followers.clear();
 			_collector.ack(input);
 		} else {
-			log.warn("event can't be handled with unknown eventType");
+			log.warn("No event passed here!");
 			_collector.fail(input);
 		}
 	}
@@ -67,13 +67,19 @@ public class AddressingEvtProc extends BaseEvtProc {
 		declarer.declare(new Fields("eventdata", "followers"));
 	}
 
-	private void loadEventMap() {
-		// TODO This is for test, needs talk to real data
-		ConcurrentHashMap<String, List<Follower>> result = new ConcurrentHashMap<String, List<Follower>>();
-		ArrayList<Follower> followers = new ArrayList<Follower>();
-		followers.add(new Follower("MPI_FO", "mpifollower", "EMR_platform"));
-		result.put(EventConstants.PA_E_TYPE, followers);
-		eventMap = result;
+	@Override
+	public void cleanup() {
+		super.cleanup();
+		locator.release();
 	}
+
+//	private void loadEventMap() {
+//		// TODO This is for test, needs talk to actual data
+//		ConcurrentHashMap<String, List<Follower>> result = new ConcurrentHashMap<String, List<Follower>>();
+//		ArrayList<Follower> followers = new ArrayList<Follower>();
+//		followers.add(new Follower("MPI_FO", "mpifollower", "EMR_platform"));
+//		result.put(EventConstants.PA_E_TYPE, followers);
+//		eventMap = result;
+//	}
 
 }
