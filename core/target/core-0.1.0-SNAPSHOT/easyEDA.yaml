@@ -1,0 +1,8 @@
+eda.pivot.incoming.host: "10.0.0.7"
+eda.pivot.incoming.port: 5559
+eda.pivot.outgoing.host: "10.0.0.7"
+eda.pivot.outgoing.port: 5560
+eda.router.incoming.host: "10.0.0.7"
+eda.router.incoming.port: 5588
+eda.router.outgoing.host: "10.0.0.7"
+eda.router.outgoing.port: 5589
