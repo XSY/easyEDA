@@ -9,8 +9,8 @@
 /test-classes
 *.jar
 *.zip
-#/core/target
-#/easyeda.sample/target
-#/eventRepo/target
-#/redisclient/target
+/core/target
+/easyeda.sample/target
+/eventRepo/target
+/redisclient/target
 /bin
