@@ -22,8 +22,8 @@ public class Sample {
 		conf.setDebug(true);
 		
 		LocalCluster cluster = new LocalCluster();
-		cluster.submitTopology("sample_thing", conf,
-				builder.createTopology());
+//		cluster.submitTopology("sample_thing", conf,
+//				builder.createTopology());
 		
 		Thread.sleep(10000);
 		cluster.killTopology("Test_ListenAllEvents");

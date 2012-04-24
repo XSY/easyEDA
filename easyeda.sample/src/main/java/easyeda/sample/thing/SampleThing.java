@@ -1,6 +1,3 @@
-/**
- * 
- */
 package easyeda.sample.thing;
 
 import java.util.List;
