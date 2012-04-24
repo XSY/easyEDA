@@ -32,41 +32,41 @@ public class ZMQUtil {
 		return msg;
 	}
 
-	public static MSG recvFromFront(Socket socket) {
-		MSG msg = new MSG(genMsgID());
-		msg.setClient(socket.recv(0));
-		socket.recv(0);
-		msg.setWorker(socket.recv(0));
-		socket.recv(0);
-		msg.setMsg(socket.recv(0));
-		return msg;
-	}
+//	public static MSG recvFromFront(Socket socket) {
+//		MSG msg = new MSG(genMsgID());
+//		msg.setClient(socket.recv(0));
+//		socket.recv(0);
+//		msg.setWorker(socket.recv(0));
+//		socket.recv(0);
+//		msg.setMsg(socket.recv(0));
+//		return msg;
+//	}
 
-	/**
-	 * This is used for the input socket which has set identity by ZMQ automatically
-	 * 
-	 * @param socket
-	 * @param msg
-	 */
-	public static void sendDirectly(Socket socket, MSG msg) {
-		socket.send(msg.getClient(), ZMQ.SNDMORE);
-		socket.send("".getBytes(), ZMQ.SNDMORE);
-		socket.send(msg.getMsg(), 0);
-	}
-
-	public static void send(Socket socket, MSG msg) {
-		// 1.set worker address
-		socket.send(msg.getWorker(), ZMQ.SNDMORE);
-		socket.send("".getBytes(), ZMQ.SNDMORE);
-		// 2.set client address
-		socket.send(msg.getClient(), ZMQ.SNDMORE);
-		socket.send("".getBytes(), ZMQ.SNDMORE);
-		// 3.set msg id
-		socket.send(msg.get_id(), ZMQ.SNDMORE);
-		socket.send("".getBytes(), ZMQ.SNDMORE);
-		// 4.set request payload
-		socket.send(msg.getMsg(), 0);
-	}
+//	/**
+//	 * This is used for the input socket which has set identity by ZMQ automatically
+//	 * 
+//	 * @param socket
+//	 * @param msg
+//	 */
+//	public static void sendDirectly(Socket socket, MSG msg) {
+//		socket.send(msg.getClient(), ZMQ.SNDMORE);
+//		socket.send("".getBytes(), ZMQ.SNDMORE);
+//		socket.send(msg.getMsg(), 0);
+//	}
+//
+//	public static void send(Socket socket, MSG msg) {
+//		// 1.set worker address
+//		socket.send(msg.getWorker(), ZMQ.SNDMORE);
+//		socket.send("".getBytes(), ZMQ.SNDMORE);
+//		// 2.set client address
+//		socket.send(msg.getClient(), ZMQ.SNDMORE);
+//		socket.send("".getBytes(), ZMQ.SNDMORE);
+//		// 3.set msg id
+//		socket.send(msg.get_id(), ZMQ.SNDMORE);
+//		socket.send("".getBytes(), ZMQ.SNDMORE);
+//		// 4.set request payload
+//		socket.send(msg.getMsg(), 0);
+//	}
 
 	public static void report(Socket socket, String word) {
 		if (word == null) {
