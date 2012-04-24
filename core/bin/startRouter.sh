@@ -1,1 +1,0 @@
-echo "Starting SuperRouter..."
