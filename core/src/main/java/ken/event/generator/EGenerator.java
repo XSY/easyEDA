@@ -18,5 +18,10 @@ public abstract class EGenerator {
 	protected static ZMQ.Context context;
 	protected static ZMQ.Socket conn;
 	
+	/**
+	 * build an well-formatted event and send it to event pivot
+	 * @param ae
+	 * @return
+	 */
 	public abstract boolean generate(AtomicE ae);
 }

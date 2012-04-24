@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
 /**
+ * DurableGenerator is for event happening in high-frequency way, so that the
+ * connection is not close each time it ends, and must manually call method done().
  * @author KennyZJ
  * 
  */

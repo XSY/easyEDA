@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
 /**
+ * SingleGenerator is for event happening in sparse way, so that the connection 
+ * close each time it ends.
  * @author KennyZJ
  * 
  */
