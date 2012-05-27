@@ -8,7 +8,6 @@ import ken.event.client.feeder.BasicFeeder;
 import ken.event.client.follower.AdvancedFollower;
 import ken.event.client.follower.OutdatedBasicFollower;
 import ken.event.client.follower.BasicFollower;
-import ken.event.client.follower.RichFollower;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +28,7 @@ public class Adapter extends Thread implements IAdapter {
 	static{
 		whitelist = new HashMap<String, String>();
 		whitelist.put(OutdatedBasicFollower.class.getName(), "allowed");
-		whitelist.put(RichFollower.class.getName(), "allowed");
+		//whitelist.put(RichFollower.class.getName(), "allowed");
 		whitelist.put(BasicFollower.class.getName(), "allowed");
 		whitelist.put(AdvancedFollower.class.getName(), "allowed");
 	}

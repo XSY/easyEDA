@@ -7,6 +7,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import ken.event.redis.RedisClient;
+
 import org.apache.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -58,14 +60,23 @@ public class EConfig {
 	public final static String EDA_THING_LISTENALL_NAME = "eda.thing.listenall.name";
 	public final static String EDA_THING_LISTENALL_WORKER = "eda.thing.listenall.worker";
 
+	private static String EDA_CONFIG_SELF = "config";
 	// static{
 	// loadAll();
 	// }
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> loadAll() {
+	public static Map<String, Object> loadAll(String filepath) {
 		log.info("loading all configuration items of easyEDA...");
-		return findAndReadConfigFile("easyEDA.yaml", true);
+		return findAndReadConfigFile(filepath, true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> loadAll() {
+		RedisClient client = RedisClient.getClient();
+		Map<String, Object> conf = client.getHashesAll(EDA_CONFIG_SELF);
+		client.returnClient();
+		return conf;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -99,9 +110,10 @@ public class EConfig {
 	}
 
 	// test
-	public static void main(String... args) {
-		log.debug((Integer) (findAndReadConfigFile("easyEDA.yaml", true)
-				.get(EDA_PIVOT_INCOMING_PORT)));
-	}
+//	public static void main(String... args) {
+//		//log.debug((Integer) (findAndReadConfigFile("easyEDA.yaml", true)
+//		//		.get(EDA_PIVOT_INCOMING_PORT)));
+//		EConfig.loadAll();
+//	}
 
 }

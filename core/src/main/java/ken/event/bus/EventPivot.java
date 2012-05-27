@@ -24,8 +24,8 @@ public class EventPivot {
 	 */
 	public static void main(String[] args) {
 		Map<String, Object> conf = EConfig.loadAll();
-		int front_port = (Integer) conf.get(EConfig.EDA_PIVOT_INCOMING_PORT);
-		int back_port = (Integer) conf.get(EConfig.EDA_PIVOT_OUTGOING_PORT);
+		int front_port = new Integer((String) conf.get(EConfig.EDA_PIVOT_INCOMING_PORT));
+		int back_port = new Integer((String) conf.get(EConfig.EDA_PIVOT_OUTGOING_PORT));
 
 		ZMQ.Context context = ZMQ.context(1);
 		ZMQ.Socket frontend = context.socket(ZMQ.ROUTER);

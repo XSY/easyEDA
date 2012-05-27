@@ -124,14 +124,18 @@ public class SuperRouter implements Runnable {
 		// askword = (String) conf.get(EConfig.EDA_ROUTER_HAND_ASK);
 		reportword = (String) conf.get(EConfig.EDA_ROUTER_HAND_REPORT);
 		workmode = (String) conf.get(EConfig.EDA_ROUTER_MODE);
-		swapall = ((Integer) conf.get(EConfig.EDA_ROUTER_SWAPALL_COUNT))
-				.intValue();
-		swapdone = ((Integer) conf.get(EConfig.EDA_ROUTER_SWAPDONE_COUNT))
-				.intValue();
-		pulse = ((Integer) conf.get(EConfig.EDA_ROUTER_DAEMON_PULSE))
-				.intValue();
-		msgTimeout = ((Integer) conf.get(EConfig.EDA_ROUTER_MSG_TIMEOUT))
-				.intValue();
+//		swapall = ((Integer) conf.get(EConfig.EDA_ROUTER_SWAPALL_COUNT))
+//				.intValue();
+		swapall = new Integer((String) conf.get(EConfig.EDA_ROUTER_SWAPALL_COUNT));
+		swapdone = new Integer((String) conf.get(EConfig.EDA_ROUTER_SWAPDONE_COUNT));
+//		swapdone = ((Integer) conf.get(EConfig.EDA_ROUTER_SWAPDONE_COUNT))
+//				.intValue();
+//		pulse = ((Integer) conf.get(EConfig.EDA_ROUTER_DAEMON_PULSE))
+//				.intValue();
+		pulse = new Integer((String) conf.get(EConfig.EDA_ROUTER_DAEMON_PULSE));
+//		msgTimeout = ((Integer) conf.get(EConfig.EDA_ROUTER_MSG_TIMEOUT))
+//				.intValue();
+		msgTimeout = new Integer((String) conf.get(EConfig.EDA_ROUTER_MSG_TIMEOUT));
 
 		worker_threadpool = new HashMap<String, Queue<SocketID>>();
 		// workers = new LinkedBlockingQueue<SocketID>();

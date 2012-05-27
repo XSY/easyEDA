@@ -14,7 +14,7 @@ import org.zeromq.ZMQ;
 
 /**
  * DurableGenerator is for event happening in high-frequency way, so that the
- * connection is not close each time it ends, and must manually call method done().
+ * connection is not close each time it ends, but must manually call method done().
  * @author KennyZJ
  * 
  */

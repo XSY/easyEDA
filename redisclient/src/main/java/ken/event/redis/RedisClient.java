@@ -1,5 +1,6 @@
 package ken.event.redis;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -25,6 +26,7 @@ public class RedisClient {
 
 	private RedisClient(Jedis jedis) {
 		this.jedis = jedis;
+		this.jedis.auth("wonders");
 	}
 
 	public static RedisClient getClient() {
@@ -43,6 +45,14 @@ public class RedisClient {
 
 	public void returnClient() {
 		pool.returnResource(jedis);
+	}
+	
+	public Map getHashesAll(String hkey){
+		return jedis.hgetAll(hkey);
+	}
+	
+	public String getHashValue(String hkey, String field){
+		return jedis.hget(hkey, field);
 	}
 
 }
